@@ -4,10 +4,28 @@ export function useInitialPrices(apiBase = '/api') {
   const [initial, setInitial] = useState([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
-    fetch(`${apiBase}/prices/latest`)
-      .then(r => r.json())
-      .then(data => { setInitial(data); setLoading(false); })
-      .catch(() => setLoading(false));
+    let cancelled = false;
+
+    const fetchLatest = () =>
+      fetch(`${apiBase}/prices/latest`)
+        .then(r => r.json())
+        .then(data => {
+          if (cancelled) return;
+          const safe = Array.isArray(data) ? data : [];
+          setInitial(safe);
+          setLoading(false);
+        })
+        .catch(() => {
+          if (!cancelled) setLoading(false);
+        });
+
+    fetchLatest();
+    const id = setInterval(fetchLatest, 3000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
   }, [apiBase]);
   return { initial, loading };
 }
@@ -17,11 +35,29 @@ export function usePriceHistory(symbol, hours = 24, apiBase = '/api') {
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     if (!symbol) return;
+    let cancelled = false;
+
+    const fetchHistory = () =>
+      fetch(`${apiBase}/prices/history/${symbol}?hours=${hours}`)
+        .then(r => r.json())
+        .then(d => {
+          if (!cancelled) {
+            setData(Array.isArray(d) ? d : []);
+            setLoading(false);
+          }
+        })
+        .catch(() => {
+          if (!cancelled) setLoading(false);
+        });
+
     setLoading(true);
-    fetch(`${apiBase}/prices/history/${symbol}?hours=${hours}`)
-      .then(r => r.json())
-      .then(d => { setData(d); setLoading(false); })
-      .catch(() => setLoading(false));
+    fetchHistory();
+    const id = setInterval(fetchHistory, 5000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
   }, [symbol, hours, apiBase]);
   return { data, loading };
 }
@@ -45,11 +81,29 @@ export function useCandles(symbol, interval = '5m', apiBase = '/api') {
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     if (!symbol) return;
+    let cancelled = false;
+
+    const fetchCandles = () =>
+      fetch(`${apiBase}/candles/${symbol}?interval=${interval}&limit=60`)
+        .then(r => r.json())
+        .then(d => {
+          if (!cancelled) {
+            setData(Array.isArray(d) ? d : []);
+            setLoading(false);
+          }
+        })
+        .catch(() => {
+          if (!cancelled) setLoading(false);
+        });
+
     setLoading(true);
-    fetch(`${apiBase}/candles/${symbol}?interval=${interval}&limit=60`)
-      .then(r => r.json())
-      .then(d => { setData(d); setLoading(false); })
-      .catch(() => setLoading(false));
+    fetchCandles();
+    const id = setInterval(fetchCandles, 5000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
   }, [symbol, interval, apiBase]);
   return { data, loading };
 }
