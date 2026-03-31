@@ -19,7 +19,7 @@ public class CandleController {
     /**
      * GET /api/candles/{symbol}?interval=1m&limit=100
      * Returns OHLCV candlestick data for charting.
-     * Intervals: 1m, 5m, 1h
+      * Intervals: 1m, 5m, 1h, 1d, 15d, 30d
      */
     @GetMapping("/candles/{symbol}")
     public ResponseEntity<List<Candle>> getCandles(

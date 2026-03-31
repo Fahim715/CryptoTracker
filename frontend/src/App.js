@@ -18,6 +18,7 @@ const COIN_LOGOS  = {
   ADA: 'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/32/color/ada.png',
 };
 const TABS        = ['CHART', 'CANDLES', 'INDICATORS', 'ALERTS'];
+const CANDLE_INTERVALS = ['1m', '5m', '1h', '1d', '15d', '30d'];
 
 // Floating coin bubble positions (match the screenshot layout)
 const FLOAT_COINS = [
@@ -489,8 +490,8 @@ export default function App() {
                 justifyContent: 'space-between', marginBottom: 14 }}>
                 <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)',
                   fontFamily: 'var(--font-mono)' }}>OHLCV — {selected}</div>
-                <div style={{ display: 'flex', gap: 4 }}>
-                  {['1m','5m','1h'].map(iv => (
+                <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                  {CANDLE_INTERVALS.map(iv => (
                     <button key={iv} onClick={() => setCandleInterval(iv)} style={{
                       background: candleInterval === iv ? 'rgba(255,255,255,0.1)' : 'none',
                       color: candleInterval === iv ? 'white' : 'rgba(255,255,255,0.4)',
@@ -501,7 +502,7 @@ export default function App() {
                   ))}
                 </div>
               </div>
-              <CandleChart data={candles} color={COIN_COLORS[selected] || '#7b8fff'} />
+              <CandleChart data={candles} interval={candleInterval} color={COIN_COLORS[selected] || '#7b8fff'} />
               <div style={{ marginTop: 10, fontSize: 10,
                 color: 'rgba(255,255,255,0.2)', fontFamily: 'var(--font-mono)' }}>
                 {candles?.length || 0} candles · aggregated from Kafka ticks

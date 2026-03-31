@@ -32,7 +32,7 @@ public class CryptoPriceConsumer {
         // 1. Persist raw tick to MongoDB
         repository.save(price);
 
-        // 2. Aggregate into OHLCV candles (1m, 5m, 1h)
+        // 2. Aggregate into OHLCV candles (1m, 5m, 1h, 1d, 15d, 30d)
         candleService.processTick(price);
 
         // 3. Check price alerts
