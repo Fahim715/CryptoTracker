@@ -6,8 +6,11 @@ import {
 
 function fmt(ts, interval = '5m') {
   const d = new Date(ts);
-  if (interval.endsWith('d')) {
+  if (interval === '1d') {
     return d.toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
+  }
+  if (interval === '15d' || interval === '30d') {
+    return d.toLocaleDateString('en-US', { year: '2-digit', month: 'short', day: '2-digit' });
   }
   return d.getHours().toString().padStart(2, '0') + ':' +
          d.getMinutes().toString().padStart(2, '0');
@@ -31,7 +34,7 @@ const CustomTooltip = ({ active, payload, interval }) => {
 };
 
 export default function CandleChart({ data, interval = '5m', color = '#00e5ff' }) {
-  if (!data || data.length < 2) {
+  if (!data || data.length < 1) {
     return (
       <div style={{ height: 200, display: 'flex', alignItems: 'center',
         justifyContent: 'center', color: 'var(--muted)', fontSize: 12,

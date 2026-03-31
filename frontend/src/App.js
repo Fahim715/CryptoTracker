@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useLivePrices } from './hooks/useLivePrices';
-import { useInitialPrices, usePriceHistory, useIndicators, useCandles, useAlerts, useSystemStats } from './hooks/useApiData';
+import { useInitialPrices, usePriceHistory, useIndicators, useCandles, useAlerts, useSystemStats, useAiMarketSummary } from './hooks/useApiData';
 import CoinCard        from './components/CoinCard';
 import PriceChart      from './components/PriceChart';
 import CandleChart     from './components/CandleChart';
 import StatusBar       from './components/StatusBar';
 import IndicatorsPanel from './components/IndicatorsPanel';
 import AlertsPanel     from './components/AlertsPanel';
+import AiMarketAnalystPanel from './components/AiMarketAnalystPanel';
 
 const SYMBOLS     = ['BTC', 'ETH', 'BNB', 'SOL', 'ADA'];
 const COIN_COLORS = { BTC: '#f7931a', ETH: '#627eea', BNB: '#f3ba2f', SOL: '#9945ff', ADA: '#3cc8c8' };
@@ -18,7 +19,7 @@ const COIN_LOGOS  = {
   ADA: 'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/32/color/ada.png',
 };
 const TABS        = ['CHART', 'CANDLES', 'INDICATORS', 'ALERTS'];
-const CANDLE_INTERVALS = ['1m', '5m', '1h', '1d', '15d', '30d'];
+const CANDLE_INTERVALS = ['1m', '5m', '1h'];
 
 // Floating coin bubble positions (match the screenshot layout)
 const FLOAT_COINS = [
@@ -58,6 +59,7 @@ export default function App() {
   const { data: indicators } = useIndicators(selected);
   const { data: candles }    = useCandles(selected, candleInterval);
   const { alerts, createAlert, deleteAlert } = useAlerts();
+  const { summary: aiSummary, loading: aiSummaryLoading, generate: generateAiSummary } = useAiMarketSummary(selected);
   const stats = useSystemStats();
 
   useEffect(() => {
@@ -254,7 +256,7 @@ export default function App() {
             color: 'rgba(255,255,255,0.92)',
             margin: '0 auto 10px',
           }}>
-            CryptoTrack Odyssey
+            CryptoTrack
           </h1>
           <h2 style={{
             fontFamily: 'var(--font-display)',
@@ -520,6 +522,14 @@ export default function App() {
                 TECHNICAL INDICATORS — {selected}
               </div>
               <IndicatorsPanel data={indicators} symbol={selected} />
+              <AiMarketAnalystPanel
+                symbol={selected}
+                summary={aiSummary?.summary}
+                model={aiSummary?.model}
+                generatedAt={aiSummary?.generatedAt}
+                loading={aiSummaryLoading}
+                onGenerate={generateAiSummary}
+              />
             </div>
           )}
 
@@ -537,17 +547,6 @@ export default function App() {
             </div>
           )}
 
-          {/* Pipeline footer */}
-          <div style={{ marginTop: 16, background: 'rgba(255,255,255,0.02)',
-            border: '1px solid rgba(255,255,255,0.05)', borderRadius: 12,
-            padding: '10px 16px', fontSize: 10,
-            color: 'rgba(255,255,255,0.2)', fontFamily: 'var(--font-mono)',
-            lineHeight: 1.8 }}>
-            <span style={{ color: '#7b8fff' }}>PIPELINE:</span>
-            {'  '}CoinGecko → RateLimiter → Kafka (crypto-prices)
-            {' → '}Consumer → MongoDB + Candles + Alerts + SSE + WebSocket
-            {' → '}React
-          </div>
         </section>
       </main>
     </div>

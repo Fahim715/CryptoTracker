@@ -1,8 +1,10 @@
 package com.cryptotracker.controller;
 
+import com.cryptotracker.model.AiMarketSummary;
 import com.cryptotracker.model.PriceAlert;
 import com.cryptotracker.model.TechnicalIndicators;
 import com.cryptotracker.ratelimit.RateLimiter;
+import com.cryptotracker.service.AiMarketAnalystService;
 import com.cryptotracker.service.PriceAlertService;
 import com.cryptotracker.service.TechnicalIndicatorService;
 import com.cryptotracker.websocket.PriceWebSocketHandler;
@@ -23,6 +25,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AnalyticsController {
 
+    private final AiMarketAnalystService    aiMarketAnalystService;
     private final TechnicalIndicatorService  indicatorService;
     private final PriceAlertService          alertService;
     private final RateLimiter                rateLimiter;
@@ -39,6 +42,16 @@ public class AnalyticsController {
     public ResponseEntity<TechnicalIndicators> getIndicators(@PathVariable String symbol) {
         TechnicalIndicators ti = indicatorService.calculate(symbol.toUpperCase());
         return ResponseEntity.ok(ti);
+    }
+
+    /**
+     * GET /api/ai/market-summary/{symbol}
+     * Sends live snapshot + technical indicators to Groq and returns a natural language summary.
+     */
+    @GetMapping("/ai/market-summary/{symbol}")
+    public ResponseEntity<AiMarketSummary> getAiMarketSummary(@PathVariable String symbol) {
+        AiMarketSummary summary = aiMarketAnalystService.generateSummary(symbol);
+        return ResponseEntity.ok(summary);
     }
 
     // ── Price Alerts ─────────────────────────────────────────────────────────

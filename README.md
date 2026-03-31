@@ -25,6 +25,10 @@ A full-stack real-time cryptocurrency analytics dashboard. Fetches live prices f
 **Technical Indicators** — RSI, MACD, Bollinger Bands, SMA, and EMA with trend signal.
 ![Indicators](images/indicators.png)
 
+**AI Market Analyst** — Sends live price + RSI/MACD/Bollinger snapshot to Groq and returns a natural language market summary.
+
+**AI Price Alert Explainer** — When an alert triggers, Groq function-calling is used to fetch indicator context and explain in plain language why price likely moved.
+
 **Price Alerts** — Create and manage real-time price alerts with live SSE-based trigger notifications.
 ![Alerts](images/alerts.png)
 
@@ -50,6 +54,7 @@ CoinGecko → Scheduler → Kafka Producer → [crypto-prices] → Kafka Consume
 ### Docker (Recommended)
 
 ```bash
+export GROQ_API_KEY=your_groq_api_key
 docker compose up --build
 ```
 
@@ -71,6 +76,7 @@ docker compose down -v     # stop + remove volumes
 # 1. Start MongoDB, Kafka, Zookeeper locally
 
 # 2. Backend
+export GROQ_API_KEY=your_groq_api_key
 cd backend && mvn spring-boot:run
 
 # 3. Frontend
@@ -87,6 +93,7 @@ cd frontend && npm install && npm start
 | GET | `/api/prices/history/{symbol}?hours=24` | Historical price ticks |
 | GET | `/api/candles/{symbol}?interval=1h&limit=100` | OHLCV candles (`1m`, `5m`, `1h`) |
 | GET | `/api/indicators/{symbol}` | RSI, MACD, Bollinger Bands, MAs |
+| GET | `/api/ai/market-summary/{symbol}` | AI natural language summary via Groq |
 | GET | `/api/alerts` | List all alerts |
 | POST | `/api/alerts` | Create alert `{ symbol, condition, targetPrice }` |
 | DELETE | `/api/alerts/{id}` | Delete an alert |

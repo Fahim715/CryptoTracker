@@ -17,6 +17,7 @@ import java.util.Map;
 public class PriceAlertService {
 
     private final PriceAlertRepository alertRepository;
+    private final AiAlertExplainerService aiAlertExplainerService;
     private final Sinks.Many<Map<String, Object>> alertSink; // SSE sink for alert events
 
     public PriceAlert createAlert(String symbol, String condition, double targetPrice) {
@@ -55,6 +56,13 @@ public class PriceAlertService {
                 alert.setTriggeredAt(Instant.now());
                 alertRepository.save(alert);
 
+                String explanation = aiAlertExplainerService.explainTriggeredAlert(
+                    symbol,
+                    alert.getCondition(),
+                    alert.getTargetPrice(),
+                    currentPrice
+                );
+
                 // Push alert event via SSE
                 Map<String, Object> event = Map.of(
                         "type",         "ALERT_TRIGGERED",
@@ -62,7 +70,8 @@ public class PriceAlertService {
                         "condition",    alert.getCondition(),
                         "targetPrice",  alert.getTargetPrice(),
                         "currentPrice", currentPrice,
-                        "triggeredAt",  alert.getTriggeredAt().toString()
+                        "triggeredAt",  alert.getTriggeredAt().toString(),
+                        "explanation",  explanation
                 );
                 alertSink.tryEmitNext(event);
 

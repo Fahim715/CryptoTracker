@@ -29,6 +29,11 @@ export default function AlertsPanel({ alerts, createAlert, deleteAlert, triggere
               padding:'7px 12px', marginBottom:6, fontSize:11,
               fontFamily:'var(--font-mono)', color:'#4fffb0' }}>
               🔔 {a.symbol} {a.condition} ${a.targetPrice?.toLocaleString()} hit @ ${a.currentPrice?.toLocaleString()}
+              {a.explanation && (
+                <div style={{ marginTop: 6, color: 'rgba(255,255,255,0.82)', lineHeight: 1.45, whiteSpace: 'pre-line' }}>
+                  {a.explanation}
+                </div>
+              )}
             </div>
           ))}
         </div>

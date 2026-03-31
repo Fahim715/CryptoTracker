@@ -147,3 +147,47 @@ export function useSystemStats(apiBase = '/api') {
   }, [apiBase]);
   return stats;
 }
+
+export function useAiMarketSummary(symbol, apiBase = '/api') {
+  const [summary, setSummary] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const generate = () => {
+    if (!symbol) return Promise.resolve(null);
+    setLoading(true);
+    return fetch(`${apiBase}/ai/market-summary/${symbol}`)
+      .then(async r => {
+        if (!r.ok) {
+          let details = '';
+          try {
+            details = await r.text();
+          } catch (_) {
+            details = '';
+          }
+          throw new Error(`AI endpoint failed (${r.status}). ${details}`.trim());
+        }
+        return r.json();
+      })
+      .then(d => {
+        setSummary(d || { summary: 'AI returned an empty response.' });
+        setLoading(false);
+        return d;
+      })
+      .catch((err) => {
+        setSummary({
+          summary: err?.message || 'Failed to reach AI market analyst endpoint.',
+          model: 'error',
+          generatedAt: new Date().toISOString(),
+        });
+        setLoading(false);
+        return null;
+      });
+  };
+
+  useEffect(() => {
+    setSummary(null);
+    if (symbol) generate();
+  }, [symbol, apiBase]);
+
+  return { summary, loading, generate };
+}

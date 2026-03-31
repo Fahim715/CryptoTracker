@@ -27,9 +27,6 @@ public class CandleAggregationService {
         updateCandle(price, "1m",  ChronoUnit.MINUTES, 1);
         updateCandle(price, "5m",  ChronoUnit.MINUTES, 5);
         updateCandle(price, "1h",  ChronoUnit.HOURS,   1);
-        updateCandle(price, "1d",  ChronoUnit.DAYS,    1);
-        updateCandle(price, "15d", ChronoUnit.DAYS,   15);
-        updateCandle(price, "30d", ChronoUnit.DAYS,   30);
     }
 
     private void updateCandle(CryptoPrice price, String interval,
@@ -83,9 +80,6 @@ public class CandleAggregationService {
             case "1m" -> Instant.now().minus(limit, ChronoUnit.MINUTES);
             case "5m" -> Instant.now().minus((long) limit * 5, ChronoUnit.MINUTES);
             case "1h" -> Instant.now().minus(limit, ChronoUnit.HOURS);
-            case "1d" -> Instant.now().minus(limit, ChronoUnit.DAYS);
-            case "15d" -> Instant.now().minus((long) limit * 15, ChronoUnit.DAYS);
-            case "30d" -> Instant.now().minus((long) limit * 30, ChronoUnit.DAYS);
             default   -> Instant.now().minus(24, ChronoUnit.HOURS);
         };
         return candleRepository.findBySymbolAndIntervalAndOpenTimeAfterOrderByOpenTimeAsc(
